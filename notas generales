@@ -1,0 +1,53 @@
+los sockets no son mas que un ipc, como los pipes
+en el caso de tcp los procesos que se comunican son dos maquinas diferentes separadas por la red. 
+
+sockets pasivos y activos
+
+pasivos: el server escucha y se mantiene a la espera de que un socket activo trate de conectarse a el
+
+el cliente usa un socket ACTIVO que trata de conectarse a un servidor 
+stream sockets
+    -Recepcion de datos garantizada
+    -No hay concepto de mensajes
+    -se describen como "orientados a conexion"
+    -em el dom de internet se llaman tcp sockets
+
+
+socket pasivo (servidor):
+    -crea el socket socket()
+    -asigna ip y numero de puerto al socket bind()
+    -marca el socket como pasive socket listen()
+    -espera hasta que un cliente quiere conectarse acept()
+
+
+socket activo (cliente):
+    -crea el socket con socket()
+    -una vez creado llamados a connect() para que intente contectarse a una direccion ip en concreto (la ip del server)
+    -cuando el server ve que hay una peticion entrante de un cliente, si puede (el server es secuencial) el acept se desbloqueara y nos va a dar un fd para poder hacer read y write
+
+    -cuando se termina de hacer la comunicacion se hace close tanto del server como del client
+
+socket(AF_INET, SOCK_STREAM, IPPROTO_IP) = 3
+setsockopt(3, SOL_SOCKET, SO_REUSEPORT, [1], 4) = 0
+bind(3, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+
+estas 3 cosas me tiran una pista de los puertos y ademas parecen estar directamente relacionadas, socket devuelve 3, setsockopt y bind usan 3 de primer paramettro 
+
+ socket() creates an endpoint for communication and returns a file
+       descriptor that refers to that endpoint.  The file descriptor
+       returned by a successful call will be the lowest-numbered file
+       descriptor not currently open for the process.
+
+        AF_INET      IPv4 Internet protocols     
+        SOCK_STREAM  Provides sequenced, reliable, two-way, connection-based
+                    byte streams.
+        IPPROTO_IP Its actually an automatic choice depending on socket type and family.
+                    If you use it, and if the socket type is SOCK_STREAM and the family is AF_INET, then the protocol will automatically be TCP
+                    --> esto es importante porque nos establece que el protocolo es TCP
+        
+int setsockopt(int socket, int level, int option_name,const void *option_value, socklen_t option_len);
+        The setsockopt() function shall set the option specified by the option_name argument, at the protocol level specified by the level argument,
+             to the value pointed to by the option_value argument for the socket associated with the file descriptor specified by the socket argument.
+             
+             To set options at the socket level, specify the level argument as SOL_SOCKET
+
