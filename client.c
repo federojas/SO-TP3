@@ -18,7 +18,7 @@
 #define PORT            8080 
 
 /* Test sequences */
-char buf_tx[] = "Hello server. I am a client";      //transmision, datos que envia el cliente al servidor
+char buf_tx[] = "entendido\n";      //transmision, datos que envia el cliente al servidor
 char buf_rx[100];                     /* receive buffer */ //leer los datos que llegan del servidor
  
  
