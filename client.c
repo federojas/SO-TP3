@@ -16,29 +16,26 @@
 
 #define SERVER_ADDRESS  "0.0.0.0"     /* server IP */
 #define PORT            8080 
-
+#define BUFF_LEN 125
 /* Test sequences */
-char buf_tx[] = "entendido\n";      //transmision, datos que envia el cliente al servidor
-char buf_rx[100];                     /* receive buffer */ //leer los datos que llegan del servidor
+char buf_tx[BUFF_LEN] ;     //transmision, datos que envia el cliente al servidor
+
  
  
 /* This clients connects, sends a text and disconnects */
 int main() 
 { 
-    int sockfd; //fd para el socket del cliente
+    int sockFd; //fd para el socket del cliente
     struct sockaddr_in servaddr;  //misma estructura que el servidor, para la direccion del sv, su puerto y su dominio
     
     /* Socket creation */
-    sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sockfd == -1) 
+    sockFd = socket(AF_INET, SOCK_STREAM, 0); 
+    if (sockFd == -1) 
     { 
         printf("CLIENT: socket creation failed...\n"); 
         return -1;  
     } 
-    else
-    {
-        printf("CLIENT: Socket successfully created..\n"); 
-    }
+    
     
     //se setea en todos los bytes de la estructura un 0
     memset(&servaddr, 0, sizeof(servaddr));
@@ -55,20 +52,28 @@ int main()
         tercer argumento el size de la estructura
         si devuelve un valor distinto de cero es que hubo un error
     */
-    if (connect(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) 
+    if (connect(sockFd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) 
     { 
         printf("connection with the server failed...\n");  
         return -1;
     } 
     
     printf("connected to the server..\n"); 
-  
-    /* send test sequences*/
-    write(sockfd, buf_tx, sizeof(buf_tx));     
-    read(sockfd, buf_rx, sizeof(buf_rx));
-    printf("CLIENT:Received: %s \n", buf_rx);
+    memset(buf_tx,0,BUFF_LEN);
+    while(fgets(buf_tx,BUFF_LEN-1,stdin)!=NULL){
+        int len=write(sockFd,buf_tx,strlen(buf_tx));
+        if(len<0){
+            printf("error del write\n");
+            return -1;
+        }
+         memset(buf_tx,0,BUFF_LEN);
+    }
+    // /* send test sequences*/
+    // write(sockFd, buf_tx, sizeof(buf_tx));     
+    // read(sockFd, buf_rx, sizeof(buf_rx));
+    // printf("CLIENT:Received: %s \n", buf_rx);
    
        
     /* close the socket */
-    close(sockfd); 
+    close(sockFd); 
 } 
