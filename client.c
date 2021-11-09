@@ -60,8 +60,8 @@ int main() {
     printf("Connected to the server...\n"); 
 
     /*-------------BORRAR DESPUES-----------------*/
-    char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n", "too_easy\n", ".RUN_ME\n"};
-    for(int i=0;i<6;i++) {
+    char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n", "too_easy\n", ".RUN_ME\n", "K5n2UFfpFMUN\n"};
+    for(int i=0;i<7;i++) {
         write(sockFd,respuestas[i],strlen(respuestas[i]));
         
     }
