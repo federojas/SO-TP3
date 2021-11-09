@@ -1,5 +1,5 @@
 #include <unistd.h>
-
+#include "levels.h"
 /* sockets */
 #include <netdb.h> 
 #include <netinet/in.h> 
@@ -87,6 +87,20 @@ int main(int argc, char* argv[]) {
     
     len = sizeof(client); 
   
+    //----------INICIALIZACION DE LEVELS--------------------------
+
+    t_level levels[]={1,"Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n"
+        "En este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\n"
+        "Además tendrán que investigar otras preguntas para responder durante la defensa.\n"
+        "El desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos"
+        " y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n"
+        "Además, deberán implementar otro programa para comunicarse conmigo.\n\n"
+        "Deberán estar atentos a los easter eggs.\n\n"
+        "Para verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'\n","entendido\\n","¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?\n"};
+
+    //------------------------------------------------------------
+
+
       /* Accept the data from incoming sockets in a iterative way */
       while(1)
       {
@@ -103,6 +117,9 @@ int main(int argc, char* argv[]) {
         } 
         else
         {              
+                printf("----------DESAFIO-------------\n");
+                printf("%s\n",levels[0].challenge);
+
             while(1) /* read data from a client socket till it is closed */ 
             {  
                 /* read client message, copy it into buffer */
@@ -113,6 +130,13 @@ int main(int argc, char* argv[]) {
                 */
                 len_rx = read(connfd, buff_rx, sizeof(buff_rx));  
                 
+                /*----------------checkeo de niveles------------------------*/
+                int respuesta=checkLevel(buff_rx,levels[0].challengeAnswer);
+                printf("%d\n",respuesta);
+
+                /*----------------------------------------------------------*/
+
+
                 if(len_rx == -1)
                 {
                     fprintf(stderr, "[SERVER-error]: connfd cannot be read. %d: %s \n", errno, strerror( errno ));

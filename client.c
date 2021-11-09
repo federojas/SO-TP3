@@ -28,6 +28,7 @@ int main()
     int sockFd; //fd para el socket del cliente
     struct sockaddr_in servaddr;  //misma estructura que el servidor, para la direccion del sv, su puerto y su dominio
     
+    char buf_rx[BUFF_LEN];
     /* Socket creation */
     sockFd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockFd == -1) 
@@ -59,6 +60,17 @@ int main()
     } 
     
     printf("connected to the server..\n"); 
+
+    /*-------------BORRAR DESPUES-----------------*/
+    char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n"};
+    for(int i=0;i<4;i++){
+        write(sockFd,respuestas[i],strlen(respuestas[i]));
+        
+    }
+
+    /*--------------------------------------------*/
+
+
     memset(buf_tx,0,BUFF_LEN);
     while(fgets(buf_tx,BUFF_LEN-1,stdin)!=NULL){
         int len=write(sockFd,buf_tx,strlen(buf_tx));
@@ -70,8 +82,8 @@ int main()
     }
     // /* send test sequences*/
     // write(sockFd, buf_tx, sizeof(buf_tx));     
-    // read(sockFd, buf_rx, sizeof(buf_rx));
-    // printf("CLIENT:Received: %s \n", buf_rx);
+    read(sockFd, buf_rx, sizeof(buf_rx));
+    printf("CLIENT:Received: %s \n", buf_rx);
    
        
     /* close the socket */
