@@ -18,23 +18,22 @@
 #define PORT            8080 
 #define BUFF_LEN 125
 /* Test sequences */
-char buf_tx[BUFF_LEN] ;     //transmision, datos que envia el cliente al servidor
+char buf_tx[BUFF_LEN];     //transmision, datos que envia el cliente al servidor
 
  
  
 /* This clients connects, sends a text and disconnects */
-int main() 
-{ 
+int main() {
     int sockFd; //fd para el socket del cliente
     struct sockaddr_in servaddr;  //misma estructura que el servidor, para la direccion del sv, su puerto y su dominio
     
     char buf_rx[BUFF_LEN];
+
     /* Socket creation */
     sockFd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sockFd == -1) 
-    { 
-        printf("CLIENT: socket creation failed...\n"); 
-        return -1;  
+    if (sockFd == -1) { 
+        perror("CLIENT: socket creation failed");
+        exit(EXIT_FAILURE);
     } 
     
     
@@ -53,17 +52,16 @@ int main()
         tercer argumento el size de la estructura
         si devuelve un valor distinto de cero es que hubo un error
     */
-    if (connect(sockFd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) 
-    { 
-        printf("connection with the server failed...\n");  
-        return -1;
+    if (connect(sockFd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) {  
+        perror("CLIENT: connection with the server failed");
+        exit(EXIT_FAILURE);
     } 
     
-    printf("connected to the server..\n"); 
+    printf("Connected to the server...\n"); 
 
     /*-------------BORRAR DESPUES-----------------*/
-    char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n"};
-    for(int i=0;i<4;i++){
+    char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n", "too_easy\n", ".RUN_ME\n", "K5n2UFfpFMUN\n", "BUmyYq5XxXGt\n", "u^v\n", "chin_chu_lan_cha\n"};
+    for(int i=0;i<10;i++) {
         write(sockFd,respuestas[i],strlen(respuestas[i]));
         
     }
@@ -72,11 +70,11 @@ int main()
 
 
     memset(buf_tx,0,BUFF_LEN);
-    while(fgets(buf_tx,BUFF_LEN-1,stdin)!=NULL){
+    while(fgets(buf_tx,BUFF_LEN-1,stdin)!=NULL) {
         int len=write(sockFd,buf_tx,strlen(buf_tx));
-        if(len<0){
-            printf("error del write\n");
-            return -1;
+        if(len<0) {
+            perror("CLIENT: write failed");
+            exit(EXIT_FAILURE);
         }
          memset(buf_tx,0,BUFF_LEN);
     }
