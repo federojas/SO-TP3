@@ -3,13 +3,17 @@
 #include <string.h>
 #include "levels.h"
 
-int checkLevel(char *usrAnswr, char *challengeAnswer){
-    return strcmp(usrAnswr,challengeAnswer)==0;
+static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer){
+    if(fgets(buffer, BUFFER_SIZE, clientFile) == NULL) {
+        perror("fgets in levelManager failed");
+        return -1;
+    }
+    return strcmp(buffer, challengeAnswer) == 0;
 }
 
 int levelManager(FILE * clientFile, char * buffer, char * challengeQuestion, char * challengeAnswer, char * investigationQuestion) {
-    printf("%s\n", challengeQuestion);
+    printf("\n------------- DESAFIO -------------\n%s\n\n", challengeQuestion);
 
-    printf("%s\n", investigationQuestion);
-    return inputAnalyzer(clientFile, buff, ans);
+    printf("\n----- PREGUNTA PARA INVESTIGAR -----\n%s\n\n", investigationQuestion);
+    return checkAnswer(clientFile, buffer, challengeAnswer);
 }

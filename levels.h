@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define BUFFER_SIZE 50
+
 typedef struct t_level{
     int level;
     char *challengeQuestion;
@@ -10,6 +12,6 @@ typedef struct t_level{
     char *investigationQuestion;
 }t_level;
 
-int checkLevel(char *usrAnswr, char *challengeAnswer);
+int levelManager(FILE * clientFile, char * buffer, char * challengeQuestion, char * challengeAnswer, char * investigationQuestion);
     
 #endif
