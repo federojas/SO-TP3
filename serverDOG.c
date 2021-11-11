@@ -53,10 +53,6 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in servaddr;
 
     unsigned int servaddrLen = sizeof(servaddr), options = 1; 
-
-    int  len_rx, len_tx = 0;  
-    char buff_tx[BUFFER_SIZE]; 
-    char buff_rx[BUFFER_SIZE];
     
     serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -124,8 +120,6 @@ static void startLevels(int clientfd) {
     int levelCompleted = 0, levelIndex = 0;
 
     while (levelIndex < LEVELS_AMOUNT && levelCompleted != -1) {
-
-        t_level currentLevel = levels[levelIndex];
 
         clearScreen();
 

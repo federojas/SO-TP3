@@ -36,7 +36,6 @@ void ebadfChallenge() {
 void filterChallenge() {
 
     char * answer = "K5n2UFfpFMUN";
-    int answerLength = strlen(answer);
 
     int i = 0;
     while (answer[i] != 0) {

@@ -11,13 +11,12 @@
 #define SERVER_ADDRESS_DEFAULT  "0.0.0.0"     
 #define PORT_DEFAULT            8080 
 #define BUFFER_SIZE 125
-char buf_tx[BUFFER_SIZE];
 
 int main(int argc, char const *argv[]) {
     int sockFd;
     struct sockaddr_in sockaddr;
-    
-    char buf_rx[BUFFER_SIZE];
+
+    char buffer[BUFFER_SIZE];
 
     int port = PORT_DEFAULT;
 
@@ -51,14 +50,14 @@ int main(int argc, char const *argv[]) {
     
     printf("Connected to the server...\n"); 
 
-    memset(buf_tx, 0, BUFFER_SIZE);
-    while(fgets(buf_tx, BUFFER_SIZE-1, stdin) != NULL) {
-        int writeLength = write(sockFd, buf_tx, strlen(buf_tx));
+    memset(buffer, 0, BUFFER_SIZE);
+    while(fgets(buffer, BUFFER_SIZE-1, stdin) != NULL) {
+        int writeLength = write(sockFd, buffer, strlen(buffer));
         if(writeLength < 0) {
             perror("CLIENT: write failed");
             exit(EXIT_FAILURE);
         }
-        memset(buf_tx, 0, BUFFER_SIZE);
+        memset(buffer, 0, BUFFER_SIZE);
     }
 
     close(sockFd); 
