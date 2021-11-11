@@ -1,159 +1,107 @@
 #include <unistd.h>
 #include "levels.h"
-/* sockets */
 #include <netdb.h> 
 #include <netinet/in.h> 
 #include <sys/socket.h> 
 #include <sys/types.h> 
 #include <arpa/inet.h>
-
-/* strings / errors*/
 #include <errno.h>
 #include <stdio.h> 
 #include <string.h> 
+#include <stdlib.h>
 
-/* server parameters */
-#define SERV_PORT       8080              /* port */
-#define SERV_HOST_ADDR "0.0.0.0"     /* IP, only IPV4 support  */
-#define BUF_SIZE        100               /* Buffer rx, tx max size  */
-#define BACKLOG         5                 /* Max. client pending connections  */
+#define SERV_PORT       8080     
+#define SERV_HOST_ADDR "0.0.0.0"     
+#define BUF_SIZE        100              
+#define BACKLOG         5      
+
+static void startLevels(int clientfd);
+
+// t_level levels[]={1,"Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n"
+//         "En este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\n"
+//         "Además tendrán que investigar otras preguntas para responder durante la defensa.\n"
+//         "El desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos"
+//         " y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n"
+//         "Además, deberán implementar otro programa para comunicarse conmigo.\n\n"
+//         "Deberán estar atentos a los easter eggs.\n\n"
+//         "Para verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'\n","entendido\\n","¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?\n"};
 
 int main(int argc, char* argv[]) {
-    int sockfd, connfd ;  /* listening socket and connection socket file descriptors */
-    unsigned int len;     /* length of client address */ 
-    //len se usara para guardar la longitud de la estructura "sockaddr_in" del cliente
-    struct sockaddr_in servaddr, client; 
-    /*para ipv4:
-         struct sockaddr_in {
-               sa_family_t    sin_family;  familia del socket 
-               in_port_t      sin_port;   puerto
-               struct in_addr sin_addr;   direccion
-           };
-    */
+    int serverfd, clientfd;  
+       
+    struct sockaddr_in servaddr;
 
-    int  len_rx, len_tx = 0;  /* received and sent length, in bytes */
-    char buff_tx[BUF_SIZE] = "Hello client, I am the server"; //transmision
-    char buff_rx[BUF_SIZE];   /* buffers for reception  */
+    unsigned int servaddrLen = sizeof(servaddr), options = 1; 
+
+    int  len_rx, len_tx = 0;  
+    char buff_tx[BUF_SIZE]; 
+    char buff_rx[BUF_SIZE];
     
-    
-    /* socket creation */
-    sockfd = socket(AF_INET, SOCK_STREAM, 0); //se guarda el fd, en el caso del server que nos dan es el 3
-    if (sockfd == -1) 
-    { 
-        fprintf(stderr, "[SERVER-error]: socket creation failed. %d: %s \n", errno, strerror( errno ));
-        return -1;
-    } 
-    else
-    {
-        printf("[SERVER]: Socket successfully created..\n"); 
+    serverfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (serverfd == -1) { 
+        perror("[SERVER-error]: socket creation failed");
+        exit(EXIT_FAILURE);
     }
-    /* clear structure */
-    memset(&servaddr, 0, sizeof(servaddr)); //inicializa con cero cada byte de esa estructura de adress format
+    
+    if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options)) == -1) {
+        perror("socket options settings failed\n");
+        exit(0);
+    }
   
-    /* assign IP, SERV_PORT, IPV4 */
     servaddr.sin_family      = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR); //convierte el string ese al formato de ip necesario
-    servaddr.sin_port        = htons(SERV_PORT); //puerto definido, htons convierte el serv_port tenga la ordenacion de bytes que debe tener en la red
+    servaddr.sin_port        = htons(SERV_PORT); 
+    inet_aton(SERV_HOST_ADDR, &servaddr.sin_addr);
     
-    
-    /* Bind socket */ //asigna una direccion ip y un puerto al socket
-    /*
-    primer argumento es el fd que devolvio el socket 
-    el segundo es un puntero a la estructura con los campos del server
-    yy el ultimo es el tamaño de la estructura 
-    */
-    if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) 
-    { 
-        fprintf(stderr, "[SERVER-error]: socket bind failed. %d: %s \n", errno, strerror( errno ));
-        return -1;
+    if ((bind(serverfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) { 
+        perror("[SERVER-error]: socket bind failed")
+        exit(EXIT_FAILURE);
     } 
-    else
-    {
-        printf("[SERVER]: Socket successfully binded \n");
-    }
   
-    /* Listen */
-    //hace que el socket creado se vuelva pasivo, esta escuchando a ver si hay conexiones entrantes 
-    //usa el fd y backlog es el numero maximo de conexiones entrantes pendientes 
-    if ((listen(sockfd, BACKLOG)) != 0) 
-    { 
-        fprintf(stderr, "[SERVER-error]: socket listen failed. %d: %s \n", errno, strerror( errno ));
-        return -1;
+    if ((listen(serverfd, BACKLOG)) != 0) { 
+        perror("[SERVER-error]: socket listen failed")
+        exit(EXIT_FAILURE);
     } 
-    else
-    {
-        printf("[SERVER]: Listening on SERV_PORT %d \n\n", ntohs(servaddr.sin_port) ); 
-    }
-    
-    len = sizeof(client); 
   
-    //----------INICIALIZACION DE LEVELS--------------------------
+    clientfd = accept(serverfd, (struct sockaddr *)&servaddr, (socklen_t*)&servaddrLen); 
 
-    t_level levels[]={1,"Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n"
-        "En este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\n"
-        "Además tendrán que investigar otras preguntas para responder durante la defensa.\n"
-        "El desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos"
-        " y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n"
-        "Además, deberán implementar otro programa para comunicarse conmigo.\n\n"
-        "Deberán estar atentos a los easter eggs.\n\n"
-        "Para verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'\n","entendido\\n","¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?\n"};
+    close(serverfd);
 
-    //------------------------------------------------------------
-
-
-      /* Accept the data from incoming sockets in a iterative way */
-      while(1)
-      {
-          /*
-            primer argumento el fd del socket 
-            segundo argumento puntero a estructura del cliente, cuando accept retorne, en la estructura se nos cargaran los valores ip puerto y dominio del cliente que se ha conectado 
-            puntero a len, que tiene el tamaño del struct 
-          */
-        connfd = accept(sockfd, (struct sockaddr *)&client, &len); 
-        if (connfd < 0) 
-        { 
-            fprintf(stderr, "[SERVER-error]: connection not accepted. %d: %s \n", errno, strerror( errno ));
-            return -1;
-        } 
-        else
-        {              
-                printf("----------DESAFIO-------------\n");
-                printf("%s\n",levels[0].challenge);
-
-            while(1) /* read data from a client socket till it is closed */ 
-            {  
-                /* read client message, copy it into buffer */
-                /*
-                    primer argumento fd del socket creado con el acept
-                    segundo buffer de recepcion
-                    tercero el size del buff
-                */
-                len_rx = read(connfd, buff_rx, sizeof(buff_rx));  
-                
-                /*----------------checkeo de niveles------------------------*/
-                int respuesta=checkLevel(buff_rx,levels[0].challengeAnswer);
-                printf("%d\n",respuesta);
-
-                /*----------------------------------------------------------*/
-
-
-                if(len_rx == -1)
-                {
-                    fprintf(stderr, "[SERVER-error]: connfd cannot be read. %d: %s \n", errno, strerror( errno ));
-                }
-                else if(len_rx == 0) /* if length is 0 client socket closed, then exit */
-                {
-                    printf("[SERVER]: client socket closed \n\n");
-                    close(connfd);
-                    break; 
-                }
-                else
-                {
-                    //el read devolvio un valor mayor que cero entonces lo imprime en el buff de recepcion y ademas le manda algo con write
-                    write(connfd, buff_tx, strlen(buff_tx));
-                    printf("[SERVER]: %s \n", buff_rx);
-                }            
-            }  
-        }                      
+    if (clientfd < 0) { 
+        perror("[SERVER-error]: connection not accepted");
+        exit(EXIT_FAILURE);
     } 
+
+    startLevels(clientfd);
+                             
+    close(clientfd);
+    
+    return 0;
 }
+
+// static void startLevels(int clientfd) {
+//     printf("----------DESAFIO-------------\n");
+//                 printf("%s\n",levels[0].challenge);
+
+//             while(1) {  
+//                 len_rx = read(clientfd, buff_rx, sizeof(buff_rx));  
+                
+//                 int respuesta=checkLevel(buff_rx,levels[0].challengeAnswer);
+//                 printf("%d\n",respuesta);
+
+//                 if(len_rx == -1) {
+//                     perror("[SERVER-error]: clientfd cannot be read");
+//                 }
+//                 else if(len_rx == 0) {
+//                     printf("[SERVER]: client socket closed \n\n");
+//                     close(clientfd);
+//                     break; 
+//                 }
+//                 else {
+//                     write(clientfd, buff_tx, strlen(buff_tx));
+//                     printf("[SERVER]: %s \n", buff_rx);
+//                 }   
+// }
+        
+                         
+ 

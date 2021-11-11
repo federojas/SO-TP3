@@ -5,11 +5,11 @@
 
 typedef struct t_level{
     int level;
-    char *challenge;
+    char *challengeQuestion;
     char *challengeAnswer;
-    char *investigation;
+    char *investigationQuestion;
 }t_level;
 
-    int checkLevel(char *usrAnswr, char *challengeAnswer);
+int checkLevel(char *usrAnswr, char *challengeAnswer);
     
 #endif
