@@ -29,9 +29,9 @@ static void startLevels(int clientfd);
 int main(int argc, char* argv[]) {
     int serverfd, clientfd;  
        
-    struct sockaddr_in servaddr, client;
+    struct sockaddr_in servaddr;
 
-    unsigned int len = sizeof(client), options = 1; 
+    unsigned int servaddrLen = sizeof(servaddr), options = 1; 
 
     int  len_rx, len_tx = 0;  
     char buff_tx[BUF_SIZE]; 
@@ -48,12 +48,10 @@ int main(int argc, char* argv[]) {
         perror("socket options settings failed\n");
         exit(0);
     }
-
-    memset(&servaddr, 0, sizeof(servaddr)); 
   
     servaddr.sin_family      = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR); 
     servaddr.sin_port        = htons(SERV_PORT); 
+    inet_aton(SERV_HOST_ADDR, &servaddr.sin_addr);
     
     if ((bind(serverfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) { 
         perror("[SERVER-error]: socket bind failed")
@@ -65,7 +63,9 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     } 
   
-    clientfd = accept(serverfd, (struct sockaddr *)&client, (socklen_t*)&len); 
+    clientfd = accept(serverfd, (struct sockaddr *)&servaddr, (socklen_t*)&servaddrLen); 
+
+    close(serverfd);
 
     if (clientfd < 0) { 
         perror("[SERVER-error]: connection not accepted");
@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
 
     startLevels(clientfd);
                              
-    close(serverfd);
+    close(clientfd);
+    
     return 0;
 }
 
