@@ -17,14 +17,39 @@
 
 static void startLevels(int clientfd);
 
-// t_level levels[]={1,"Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n"
-//         "En este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\n"
-//         "Además tendrán que investigar otras preguntas para responder durante la defensa.\n"
-//         "El desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos"
-//         " y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n"
-//         "Además, deberán implementar otro programa para comunicarse conmigo.\n\n"
-//         "Deberán estar atentos a los easter eggs.\n\n"
-//         "Para verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'\n","entendido\\n","¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?\n"};
+static t_level levels[] = {
+    {void, "Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n
+    En este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\n
+    Además tendrán que investigar otras preguntas para responder durante la defensa.\n
+    El desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos
+    y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n
+    Además, deberán implementar otro programa para comunicarse conmigo.\n\n
+    Deberán estar atentos a los easter eggs.\n\n
+    Para verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'\n"
+    ,"entendido\n", "¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?\n\n"},
+    {void, "The Wire S1E5\n5295 888 6288\n\n", "itba\n", 
+    "¿Qué diferencias hay entre TCP y UDP y en qué casos conviene usar cada uno?\n\n"},
+    {void, "https://ibb.co/tc0Hb6w\n\n", "M4GFKZ289aku\n", 
+    "¿El puerto que usaron para conectarse al server es el mismo que usan para mandar las respuestas? ¿Por qué?\n\n"},
+    {ebadfChallenge, "EBADF...\n\n", "fk3wfLCm3QvS\n", 
+    "¿Qué útil abstracción es utilizada para comunicarse con sockets? 
+    ¿se puede utilizar read(2) y write(2) para operar?\n\n"},
+    {void, "respuesta = strings:245\n\n", "too_easy\n", 
+    "¿Cómo garantiza TCP que los paquetes llegan en orden y no se pierden?\n\n"},
+    {void, ".data .bss .comment ? .shstrtab .symtab .strtab\n\n", ".RUN_ME\n", 
+    "Un servidor suele crear un nuevo proceso o thread para atender las conexiones entrantes. 
+    ¿Qué conviene más?\n\n"},
+    {filterChallenge, "Filter error\n", "K5n2UFfpFMUN\n", 
+    "¿Cómo se puede implementar un servidor que atienda muchas conexiones sin usar procesos ni threads?\n\n"},
+    {incognitoChallenge, "¿?\n\n", "BUmyYq5XxXGt\n", 
+    "¿Qué aplicaciones se pueden utilizar para ver el tráfico por la red?\n\n"},
+    {void, "Latexme\n\nSi\n\\mathrm{d}y = u^v{\\cdot}(v'{\\cdot}\\ln{(u)}+v{\\cdot}\\frac{u'}{u})\nentonces\n
+    y =\n\n", "u^v\n", "sockets es un mecanismo de IPC. ¿Qué es más eficiente entre sockets y pipes?\n\n"},
+    {quineChallenge, "quine.\n\n", "chin_chu_lan_cha\n", "¿Cuáles son las características del protocolo SCTP?\n\n"},
+    {gdbChallenge, "b gdbme y encontrá el valor mágico ENTER para reintentar.\n\n", "gdb_rules\n", "¿Qué es un RFC?\n\n"},
+    {randomChallenge, "Me conoces\n\n", "normal\n", "¿Fue divertido?\n\n"}
+
+};
 
 int main(int argc, char* argv[]) {
     int serverfd, clientfd;  
@@ -75,7 +100,7 @@ int main(int argc, char* argv[]) {
     startLevels(clientfd);
                              
     close(clientfd);
-    
+
     return 0;
 }
 
