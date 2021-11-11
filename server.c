@@ -12,10 +12,12 @@
 
 #define SERV_PORT       8080     
 #define SERV_HOST_ADDR "0.0.0.0"     
-#define BUF_SIZE        100              
+#define BUFFER_SIZE        100              
 #define BACKLOG         5      
+#define LEVELS_AMOUNT 12
 
 static void startLevels(int clientfd);
+static void clearScreen();
 
 static t_level levels[] = {
     {void, "Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n
@@ -48,7 +50,6 @@ static t_level levels[] = {
     {quineChallenge, "quine.\n\n", "chin_chu_lan_cha\n", "¿Cuáles son las características del protocolo SCTP?\n\n"},
     {gdbChallenge, "b gdbme y encontrá el valor mágico ENTER para reintentar.\n\n", "gdb_rules\n", "¿Qué es un RFC?\n\n"},
     {randomChallenge, "Me conoces\n\n", "normal\n", "¿Fue divertido?\n\n"}
-
 };
 
 int main(int argc, char* argv[]) {
@@ -59,8 +60,8 @@ int main(int argc, char* argv[]) {
     unsigned int servaddrLen = sizeof(servaddr), options = 1; 
 
     int  len_rx, len_tx = 0;  
-    char buff_tx[BUF_SIZE]; 
-    char buff_rx[BUF_SIZE];
+    char buff_tx[BUFFER_SIZE]; 
+    char buff_rx[BUFFER_SIZE];
     
     serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -74,8 +75,8 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
   
-    servaddr.sin_family      = AF_INET; 
-    servaddr.sin_port        = htons(SERV_PORT); 
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_port = htons(SERV_PORT); 
     inet_aton(SERV_HOST_ADDR, &servaddr.sin_addr);
     
     if ((bind(serverfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) { 
@@ -104,29 +105,60 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-// static void startLevels(int clientfd) {
-//     printf("----------DESAFIO-------------\n");
-//                 printf("%s\n",levels[0].challenge);
+static void startLevels(int clientfd) {
 
-//             while(1) {  
-//                 len_rx = read(clientfd, buff_rx, sizeof(buff_rx));  
-                
-//                 int respuesta=checkLevel(buff_rx,levels[0].challengeAnswer);
-//                 printf("%d\n",respuesta);
+    srand(time(0));
 
-//                 if(len_rx == -1) {
-//                     perror("[SERVER-error]: clientfd cannot be read");
-//                 }
-//                 else if(len_rx == 0) {
-//                     printf("[SERVER]: client socket closed \n\n");
-//                     close(clientfd);
-//                     break; 
-//                 }
-//                 else {
-//                     write(clientfd, buff_tx, strlen(buff_tx));
-//                     printf("[SERVER]: %s \n", buff_rx);
-//                 }   
-// }
-        
+    FILE * clientFile = fdopen(clientfd, "r");
+
+    if(clientFile == NULL) {
+        perror("[SERVER-error]: client fdopen failed");
+        return ;
+    }
+
+    char * input = malloc(sizeof(char) * BUFFER_SIZE);
+    if(input == NULL) {
+        fclose(clientFile);
+        perror("[SERVER-error]: malloc failed");
+        return ;
+    }
+
+    int levelCompleted = 0, levelIndex = 0;
+
+    while (levelIndex < LEVELS_AMOUNT && levelCompleted != -1) {
+
+        t_level currentLevel = levels[levelIndex];
+
+        clearScreen();
+
+        memset(input, 0, BUFFER_SIZE);
+
+        levelCompleted = levelManager(clientFile, input, levels[levelIndex]);
+
+        if (levelCompleted  == 1) {
+            levelIndex++;
+        } else {
+            printf("Respuesta incorrecta: %s\n", input);
+            sleep(2);
+        }
+    }
+
+    free(input);
+
+    fclose(clientFile);
+
+    if (levelCompleted == -1) {
+        return ;
+    }
+
+    clearScreen();
+    
+    printf("Felicitaciones, finalizaron el juego. Ahora deberán implementar el servidor que se comporte como el servidor provisto\n\n");     
+}   
+
+static void clearScreen() {
+    printf("\033[1;1H\033[2J");
+}
+    
                          
  

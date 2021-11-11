@@ -14,7 +14,7 @@ typedef struct t_level{
     char *investigationQuestion;
 }t_level;
 
-int levelManager(FILE * clientFile, char * buffer, char * challengeQuestion, char * challengeAnswer, char * investigationQuestion);
+int levelManager(FILE * clientFile, char * buffer, t_level * level);
 void ebadfChallenge();
 void filterChallenge();
 void incognitoChallenge();
