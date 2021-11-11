@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 
-#define BUFFER_SIZE 50
+#define BUFFER_SIZE 100    
 
-typedef int (*t_challenge_function)(void);
+typedef void (* t_challenge_function )(void);
 
 typedef struct t_level{
     t_challenge_function challenge;

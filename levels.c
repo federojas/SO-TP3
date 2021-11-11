@@ -19,7 +19,7 @@ static double drand();
 static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer);
 
 int levelManager(FILE * clientFile, char * buffer, t_level * level) {
-    printf("\n------------- DESAFIO -------------\n%s\n\n", level->challengeQuestion);
+    printf("------------- DESAFIO -------------\n%s\n\n", level->challengeQuestion);
     if(level->challenge != NULL) {
         level->challenge();
     }
@@ -28,7 +28,7 @@ int levelManager(FILE * clientFile, char * buffer, t_level * level) {
 }
 
 void ebadfChallenge() {
-    if (write(13, "................................La respuesta es fk3wfLCm3QvS\n", 62) == -1) {
+    if (write(13, "................................La respuesta es fk3wfLCm3QvS\n", 61) == -1) {
         perror("write");
     }
 }
@@ -43,7 +43,7 @@ void filterChallenge() {
         int randomfd = (rand() % FILTER_MODULE) + 1;
 
         if (randomfd == STDOUT_FILENO) {
-            write(STDOUT_FILENO, answer[i++], 1);
+            write(STDOUT_FILENO, answer + i++, 1);
         }
 
         else {
@@ -86,6 +86,7 @@ void randomChallenge() {
     for (int i = 0; i < NORMAL_DIST_AMOUNT; i++) {
         printf("%.6f ", getNormalDistributedNumber());
     }  
+    printf("\n");
 }
 
 static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer) {
