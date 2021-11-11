@@ -2,6 +2,8 @@
     "files.associations": {
         "string.h": "c",
         "levels.h": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c"
     }
 }
