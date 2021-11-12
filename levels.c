@@ -9,6 +9,7 @@
 #define LAST_ASCII_PRINT 126
 #define FILTER_MODULE 7
 #define NORMAL_DIST_AMOUNT 1000
+#define MAGIC_PID_GDB_CHALLENGE 0x12345678
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -104,7 +105,7 @@ static double getNormalDistributedNumber() {
 }
 
 static void gdbme() {
-    if (getpid() == 0x12345678) {
+    if (getpid() == MAGIC_PID_GDB_CHALLENGE) {
         printf("La respuesta es: gdb_rules\n\n");
     }
 }
