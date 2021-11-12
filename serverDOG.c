@@ -34,7 +34,7 @@ t_level levels[] = {
     "¿El puerto que usaron para conectarse al server es el mismo que usan para mandar las respuestas? ¿Por qué?"},
     {&ebadfChallenge, "EBADF...", "fk3wfLCm3QvS\n", 
     "¿Qué útil abstracción es utilizada para comunicarse con sockets? ¿Se puede utilizar read(2) y write(2) para operar?"},
-    {NULL, "respuesta = strings:245", "too_easy\n", 
+    {NULL, "respuesta = strings:85", "too_easy\n", 
     "¿Cómo garantiza TCP que los paquetes llegan en orden y no se pierden?"},
     {NULL, ".data .bss .comment ? .shstrtab .symtab .strtab", ".RUN_ME\n", 
     "Un servidor suele crear un nuevo proceso o thread para atender las conexiones entrantes. ¿Qué conviene más?"},

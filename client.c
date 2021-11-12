@@ -56,6 +56,7 @@ static int initializeClientSettings(struct sockaddr_in sockaddr, int clientfd) {
         perror("CLIENT: connection with the server failed");
         exit(EXIT_FAILURE);
     } 
+    return 0;
 }
 
 void clientManager(struct sockaddr_in sockaddr, int clientfd) {
