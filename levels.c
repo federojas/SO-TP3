@@ -17,6 +17,7 @@
 static double getNormalDistributedNumber();
 static double drand();
 static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer);
+static void gdbme();
 
 int levelManager(FILE * clientFile, char * buffer, t_level * level) {
     printf("------------- DESAFIO -------------\n%s\n\n", level->challengeQuestion);
@@ -76,9 +77,7 @@ void quineChallenge() {
 }
 
 void gdbChallenge() {
-    if (getpid() == 0x12345678) {
-        printf("La respuesta es: gdb_rules\n\n");
-    }
+    gdbme();
 }
 
 void randomChallenge() {
@@ -102,4 +101,10 @@ static double drand() {
 
 static double getNormalDistributedNumber() {
   return sqrt(-2*log(drand())) * cos(2*M_PI*drand());
+}
+
+static void gdbme() {
+    if (getpid() == 0x12345678) {
+        printf("La respuesta es: gdb_rules\n\n");
+    }
 }
