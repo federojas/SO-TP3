@@ -1,9 +1,3 @@
-/**************************************************************************************/
-/* @file    client_1.c                                                               */
-/* @brief   This clients connects,                                                   */
-/*          sends a text, reads what server and disconnects                          */
-/*************************************************************************************/
-
 #include <netdb.h> 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -14,76 +8,70 @@
 #include <arpa/inet.h> 
 #include <unistd.h>
 
-#define SERVER_ADDRESS  "0.0.0.0"     /* server IP */
+#define SERVER_ADDRESS  "0.0.0.0"     
 #define PORT            8080 
-#define BUFF_LEN 125
-/* Test sequences */
-char buf_tx[BUFF_LEN];     //transmision, datos que envia el cliente al servidor
+#define BUFFER_SIZE 125
 
- 
- 
-/* This clients connects, sends a text and disconnects */
-int main() {
-    int sockFd; //fd para el socket del cliente
-    struct sockaddr_in servaddr;  //misma estructura que el servidor, para la direccion del sv, su puerto y su dominio
+static int createClientSocket();
+static int initializeClientSettings(struct sockaddr_in sockaddr, int clientfd);
+void clientManager(struct sockaddr_in sockaddr, int clientfd);
+
+int main(int argc, char const *argv[]) {
+    int clientfd;
+    struct sockaddr_in sockaddr;
+
+    if(argc != 1) {
+        fprintf(stderr, "Use ./client\n");
+        exit(EXIT_FAILURE);
+    }
+
+    clientfd = createClientSocket(); 
+
+    if(initializeClientSettings(sockaddr, clientfd) ==-1) {
+        return -1;
+    }
     
-    char buf_rx[BUFF_LEN];
+    clientManager(sockaddr, clientfd);
+} 
 
-    /* Socket creation */
-    sockFd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sockFd == -1) { 
+static int createClientSocket() {
+    int clientfd = socket(AF_INET, SOCK_STREAM, 0); 
+    if (clientfd == -1) { 
         perror("CLIENT: socket creation failed");
         exit(EXIT_FAILURE);
     } 
-    
-    
-    //se setea en todos los bytes de la estructura un 0
-    memset(&servaddr, 0, sizeof(servaddr));
+    return clientfd;
+}
 
-    /* assign IP, PORT */
-    servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr( SERVER_ADDRESS ); 
-    servaddr.sin_port = htons(PORT); 
+static int initializeClientSettings(struct sockaddr_in sockaddr, int clientfd) {
+    if (inet_pton(AF_INET, SERVER_ADDRESS, &sockaddr.sin_addr) <= 0) {
+        printf("CLIENT: inet_pton invalid address");
+        return -1;
+    }
 
-    /* try to connect the client socket to server socket */
-    /*
-        primer argumento fd del socket creado para el cliente
-        segundo la estructura con los campos
-        tercer argumento el size de la estructura
-        si devuelve un valor distinto de cero es que hubo un error
-    */
-    if (connect(sockFd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) {  
+    sockaddr.sin_family = AF_INET; 
+    sockaddr.sin_port = htons(PORT); 
+
+    if (connect(clientfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) != 0) {  
         perror("CLIENT: connection with the server failed");
         exit(EXIT_FAILURE);
     } 
-    
+}
+
+void clientManager(struct sockaddr_in sockaddr, int clientfd) {
     printf("Connected to the server...\n"); 
 
-    /*-------------BORRAR DESPUES-----------------*/
-    // char respuestas[][30]={"entendido\n", "itba\n","M4GFKZ289aku\n","fk3wfLCm3QvS\n", "too_easy\n", ".RUN_ME\n", "K5n2UFfpFMUN\n", "BUmyYq5XxXGt\n", "u^v\n", "chin_chu_lan_cha\n", "gdb_rules\n", "normal\n"};
-    // for(int i=0;i<12;i++) {
-    //     write(sockFd,respuestas[i],strlen(respuestas[i]));
-        
-    // }
+    char buffer[BUFFER_SIZE];
 
-    /*--------------------------------------------*/
-
-
-    memset(buf_tx,0,BUFF_LEN);
-    while(fgets(buf_tx,BUFF_LEN-1,stdin)!=NULL) {
-        int len=write(sockFd,buf_tx,strlen(buf_tx));
-        if(len<0) {
+    memset(buffer, 0, BUFFER_SIZE);
+    while(fgets(buffer, BUFFER_SIZE-1, stdin) != NULL) {
+        int writeLength = write(clientfd, buffer, strlen(buffer));
+        if(writeLength < 0) {
             perror("CLIENT: write failed");
             exit(EXIT_FAILURE);
         }
-         memset(buf_tx,0,BUFF_LEN);
+        memset(buffer, 0, BUFFER_SIZE);
     }
-    // /* send test sequences*/
-    // write(sockFd, buf_tx, sizeof(buf_tx));     
-    read(sockFd, buf_rx, sizeof(buf_rx));
-    printf("CLIENT:Received: %s \n", buf_rx);
-   
-       
-    /* close the socket */
-    close(sockFd); 
-} 
+
+    close(clientfd); 
+}

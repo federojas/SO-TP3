@@ -9,6 +9,7 @@
 #define LAST_ASCII_PRINT 126
 #define FILTER_MODULE 7
 #define NORMAL_DIST_AMOUNT 1000
+#define MAGIC_PID_GDB_CHALLENGE 0x12345678
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -17,9 +18,10 @@
 static double getNormalDistributedNumber();
 static double drand();
 static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer);
+static void gdbme();
 
 int levelManager(FILE * clientFile, char * buffer, t_level * level) {
-    printf("\n------------- DESAFIO -------------\n%s\n\n", level->challengeQuestion);
+    printf("------------- DESAFIO -------------\n%s\n\n", level->challengeQuestion);
     if(level->challenge != NULL) {
         level->challenge();
     }
@@ -28,7 +30,7 @@ int levelManager(FILE * clientFile, char * buffer, t_level * level) {
 }
 
 void ebadfChallenge() {
-    if (write(13, "................................La respuesta es fk3wfLCm3QvS\n", 62) == -1) {
+    if (write(13, "................................La respuesta es fk3wfLCm3QvS\n", 61) == -1) {
         perror("write");
     }
 }
@@ -36,14 +38,13 @@ void ebadfChallenge() {
 void filterChallenge() {
 
     char * answer = "K5n2UFfpFMUN";
-    int answerLength = strlen(answer);
 
     int i = 0;
     while (answer[i] != 0) {
         int randomfd = (rand() % FILTER_MODULE) + 1;
 
         if (randomfd == STDOUT_FILENO) {
-            write(STDOUT_FILENO, answer[i++], 1);
+            write(STDOUT_FILENO, answer + i++, 1);
         }
 
         else {
@@ -77,15 +78,14 @@ void quineChallenge() {
 }
 
 void gdbChallenge() {
-    if (getpid() == 0x12345678) {
-        printf("La respuesta es: gdb_rules\n\n");
-    }
+    gdbme();
 }
 
 void randomChallenge() {
     for (int i = 0; i < NORMAL_DIST_AMOUNT; i++) {
         printf("%.6f ", getNormalDistributedNumber());
     }  
+    printf("\n");
 }
 
 static int checkAnswer(FILE *clientFile, char *buffer, char *challengeAnswer) {
@@ -102,4 +102,10 @@ static double drand() {
 
 static double getNormalDistributedNumber() {
   return sqrt(-2*log(drand())) * cos(2*M_PI*drand());
+}
+
+static void gdbme() {
+    if (getpid() == MAGIC_PID_GDB_CHALLENGE) {
+        printf("La respuesta es: gdb_rules\n\n");
+    }
 }
