@@ -18,10 +18,14 @@
 
 static void startLevels(int clientfd);
 static void clearScreen();
+static int createServerSocket();
+static void initializeServerSettings(struct sockaddr_in servaddr, int serverfd);
+static void clientManager(struct sockaddr_in servaddr, int serverfd, unsigned int servaddrLen);
 
 char * cow = " _______________________\n< ESTO ES UN EASTER_EGG >\n -----------------------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||\n";
 
-static t_level levels[] = {
+static 
+t_level levels[] = {
     {NULL, "Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\nEn este TP deberán finalizar el juego que ya comenzaron resolviendo los desafíos de cada nivel.\nAdemás tendrán que investigar otras preguntas para responder durante la defensa.\nEl desafío final consiste en crear un programa que se comporte igual que yo, es decir, que provea los mismos desafíos y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\nAdemás, deberán implementar otro programa para comunicarse conmigo.\n\nDeberán estar atentos a los easter eggs.\n\nPara verificar que sus respuestas tienen el formato correcto respondan a este desafío con la palabra 'entendido\\n'"
     ,"entendido\n", "¿Cómo descubrieron el protocolo, la dirección y el puerto para conectarse?"},
     {NULL, "The Wire S1E5\n5295 888 6288", "itba\n", 
@@ -48,54 +52,16 @@ static t_level levels[] = {
 };
 
 int main(int argc, char* argv[]) {
-    int serverfd, clientfd;  
+    int serverfd;  
        
     struct sockaddr_in servaddr;
 
-    unsigned int servaddrLen = sizeof(servaddr), options = 1; 
-    
-    serverfd = socket(AF_INET, SOCK_STREAM, 0);
+    serverfd = createServerSocket();
 
-    if (serverfd == -1) { 
-        perror("[SERVER-error]: socket creation failed");
-        exit(EXIT_FAILURE);
-    }
-    
-    if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options)) == -1) {
-        perror("[SERVER-error]: socket options settings failed\n");
-        exit(0);
-    }
+    initializeServerSettings(servaddr, serverfd);
+
+    clientManager(servaddr, serverfd, sizeof(servaddr));
   
-    servaddr.sin_family = AF_INET; 
-    servaddr.sin_port = htons(SERV_PORT); 
-    if(inet_aton(SERV_HOST_ADDR, &servaddr.sin_addr) == 0) {
-        perror("[SERVER-error]: inet_aton failed\n");
-        exit(0);
-    }
-    
-    if ((bind(serverfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) { 
-        perror("[SERVER-error]: socket bind failed");
-        exit(EXIT_FAILURE);
-    } 
-  
-    if ((listen(serverfd, BACKLOG)) != 0) { 
-        perror("[SERVER-error]: socket listen failed");
-        exit(EXIT_FAILURE);
-    } 
-  
-    clientfd = accept(serverfd, (struct sockaddr *)&servaddr, (socklen_t*)&servaddrLen); 
-
-    close(serverfd);
-
-    if (clientfd < 0) { 
-        perror("[SERVER-error]: connection not accepted");
-        exit(EXIT_FAILURE);
-    } 
-
-    startLevels(clientfd);
-                             
-    close(clientfd);
-
     return 0;
 }
 
@@ -151,6 +117,56 @@ static void startLevels(int clientfd) {
 static void clearScreen() {
     printf("\033[1;1H\033[2J");
 }
+
+static int createServerSocket() {
+    int serverfd;
+    serverfd = socket(AF_INET, SOCK_STREAM, 0);
+    int options = 1;
+
+    if (serverfd == -1) { 
+        perror("[SERVER-error]: socket creation failed");
+        exit(EXIT_FAILURE);
+    }
     
+    if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options)) == -1) {
+        perror("[SERVER-error]: socket options settings failed\n");
+        exit(0);
+    }
+    return serverfd;
+}
+
+static void initializeServerSettings(struct sockaddr_in servaddr, int serverfd) {
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_port = htons(SERV_PORT); 
+    if(inet_aton(SERV_HOST_ADDR, &servaddr.sin_addr) == 0) {
+        perror("[SERVER-error]: inet_aton failed\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    if ((bind(serverfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) { 
+        perror("[SERVER-error]: socket bind failed");
+        exit(EXIT_FAILURE);
+    } 
+  
+    if ((listen(serverfd, BACKLOG)) != 0) { 
+        perror("[SERVER-error]: socket listen failed");
+        exit(EXIT_FAILURE);
+    } 
+}
+    
+static void clientManager(struct sockaddr_in servaddr, int serverfd, unsigned int servaddrLen) {
+    int clientfd = accept(serverfd, (struct sockaddr *)&servaddr, (socklen_t*) &servaddrLen); 
+
+    close(serverfd);
+
+    if (clientfd < 0) { 
+        perror("[SERVER-error]: connection not accepted");
+        exit(EXIT_FAILURE);
+    } 
+
+    startLevels(clientfd);
+                             
+    close(clientfd);
+}
                          
  
