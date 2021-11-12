@@ -55,7 +55,7 @@ void filterChallenge() {
 }
 
 void incognitoChallenge() {
-    printf("\033[30;40mLa respuesta es BUmyYq5XxXGt\033[0m\n\n");
+    printf("\033[30;40mLa respuesta es BUmyYq5XxXGt\033[0m\n");
 }
 
 void quineChallenge() {
