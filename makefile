@@ -26,12 +26,9 @@ client:
 clean:
 	rm -rf *.o serverDOG client
 
-#  cleanTest:
-#  	rm -rf output.cppOut report.tasks results.valgrind
+cleanTest: rm -rf output.cppOut report.tasks results.valgrind;
 
-#  test: cleanTest
-# 	./pvs.sh;
-# 	cppcheck --quiet --enable=all --force --inconclusive customServer.c levels.c user.c 2>> output.cppOut;
+test: ./pvs.sh;
+	cppcheck --quiet --enable=all --force --inconclusive serverDOG.c levels.c client.c 2>> output.cppOut;
 
-#cleanTest #test
-.PHONY: all clean client serverDOG server
+.PHONY: all clean cleanTest test client serverDOG server

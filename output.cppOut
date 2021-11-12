@@ -1,0 +1,4 @@
+[client.c:32]: (error) Uninitialized variable: sockaddr
+[serverDOG.c:63]: (error) Uninitialized variable: servaddr
+[serverDOG.c:65]: (error) Uninitialized variable: servaddr
+(information) Cppcheck cannot find all the include files (use --check-config for details)
