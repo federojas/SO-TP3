@@ -34,6 +34,7 @@ int main(int argc, char const *argv[]) {
     }
     
     clientManager(sockaddr, clientfd);
+    return 0;
 } 
 
 static int createClientSocket() {
@@ -67,8 +68,8 @@ void clientManager(struct sockaddr_in sockaddr, int clientfd) {
     char buffer[BUFFER_SIZE];
 
     memset(buffer, 0, BUFFER_SIZE);
-    while(fgets(buffer, BUFFER_SIZE-1, stdin) != NULL) {
-        int writeLength = write(clientfd, buffer, strlen(buffer));
+    while(fgets(buffer, BUFFER_SIZE - 1, stdin) != NULL) {
+        int writeLength = write(clientfd, buffer, strlen(buffer) > 0 ? strlen(buffer) : 0);
         if(writeLength < 0) {
             perror("CLIENT: write failed");
             exit(EXIT_FAILURE);

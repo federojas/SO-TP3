@@ -24,11 +24,17 @@ client:
 	$(CC) $(GCCFLAGS) $(SOURCE_CLIENT) -o $(EXECUTABLE_CLIENT)
 
 clean:
-	rm -rf *.o serverDOG client
+	rm -rf *.o serverDOG client levels
 
-cleanTest: rm -rf output.cppOut report.tasks results.valgrind;
+cleantest: 
+	rm -rf output.cppout report.tasks
 
-test: ./pvs.sh;
-	cppcheck --quiet --enable=all --force --inconclusive serverDOG.c levels.c client.c 2>> output.cppOut;
+test:
+	pvs-studio-analyzer trace -- make;
+	pvs-studio-analyzer analyze;
+	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o report.tasks PVS-Studio.log;
+	rm -f strace_out;
+	rm -f PVS-Studio.log;
+	cppcheck --quiet --enable=all --force --inconclusive serverDOG.c client.c levels.c  2>> output.cppout;
 
-.PHONY: all clean cleanTest test client serverDOG server
+.PHONY: all clean cleantest test client serverDOG server
